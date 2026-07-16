@@ -27,7 +27,7 @@ fun AddEditProductScreen(
     var brand by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var price by remember { mutableStateOf("") }
-    var sellerId by remember { mutableStateOf("") }
+    var type by remember { mutableStateOf("") }
     var imageUrl by remember { mutableStateOf("") }
     var condition by remember { mutableStateOf("Nuevo") }
 
@@ -78,9 +78,9 @@ fun AddEditProductScreen(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
             OutlinedTextField(
-                value = sellerId,
-                onValueChange = { sellerId = it },
-                label = { Text("ID del Vendedor") },
+                value = type,
+                onValueChange = { type = it },
+                label = { Text("Tipo de Producto") },
                 modifier = Modifier.fillMaxWidth()
             )
             OutlinedTextField(
@@ -107,7 +107,8 @@ fun AddEditProductScreen(
                         brand = brand,
                         description = description,
                         price = price.toLongOrNull() ?: 0L,
-                        sellerId = sellerId,
+                        type = type,
+                        sellerId = "", // Asignado por el backend
                         imageUrl = imageUrl,
                         condition = condition
                     )

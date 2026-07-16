@@ -71,15 +71,43 @@ fun HomeScreen(
                 Spacer(modifier = Modifier.height(16.dp))
                 WelcomeBanner()
                 Spacer(modifier = Modifier.height(24.dp))
-                CategoriesGrid()
-                Spacer(modifier = Modifier.height(24.dp))
                 
+                Text(
+                    text = "Productos Disponibles",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 12.dp)
+                )
+
                 if (isLoading) {
                     Box(modifier = Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) {
                         CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                     }
+                } else if (products.isEmpty()) {
+                    Box(
+                        modifier = Modifier.fillMaxWidth().height(200.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(
+                                Icons.Outlined.ShoppingCart,
+                                contentDescription = null,
+                                modifier = Modifier.size(48.dp),
+                                tint = Color.Gray
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                "Aún no hay productos publicados",
+                                color = Color.Gray,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    }
                 } else {
-                    ProductSection(products)
+                    products.forEach { product ->
+                        ProductListItem(product)
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
                 }
                 Spacer(modifier = Modifier.height(16.dp))
             }
@@ -196,113 +224,78 @@ fun WelcomeBanner() {
 }
 
 @Composable
-fun CategoriesGrid() {
-    val categories = listOf(
-        CategoryItem("Hogar & Decoración", Icons.Default.Home),
-        CategoryItem("Artesanías", Icons.Default.Brush),
-        CategoryItem("Moda", Icons.Default.Checkroom),
-        CategoryItem("Mascotas", Icons.Default.Pets),
-        CategoryItem("Tecnología", Icons.Default.Smartphone),
-        CategoryItem("Gourmet", Icons.Default.LunchDining)
-    )
-    
-    Column {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            categories.take(3).forEach { cat -> CategoryCard(cat, Modifier.weight(1f)) }
-        }
-        Spacer(modifier = Modifier.height(12.dp))
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            categories.drop(3).forEach { cat -> CategoryCard(cat, Modifier.weight(1f)) }
-        }
-    }
-}
-
-data class CategoryItem(val name: String, val icon: ImageVector)
-
-@Composable
-fun CategoryCard(item: CategoryItem, modifier: Modifier = Modifier) {
+fun ProductListItem(product: Product) {
     Card(
-        modifier = modifier.aspectRatio(1f),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFEBD9C5))
-    ) {
-        Column(
-            modifier = Modifier.fillMaxSize().padding(8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Icon(item.icon, contentDescription = null, modifier = Modifier.size(32.dp), tint = Color(0xFF3D2314))
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = item.name,
-                fontSize = 10.sp,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                lineHeight = 12.sp,
-                color = Color(0xFF3D2314)
-            )
-        }
-    }
-}
-
-@Composable
-fun ProductSection(products: List<Product>) {
-    LazyRow(
-        contentPadding = PaddingValues(vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        items(products) { product ->
-            ProductMockupItem(product)
-        }
-    }
-}
-
-@Composable
-fun ProductMockupItem(product: Product) {
-    Card(
-        modifier = Modifier.width(160.dp),
+        modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(2.dp)
     ) {
-        Column(modifier = Modifier.padding(8.dp)) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             AsyncImage(
                 model = product.imageUrl,
                 contentDescription = null,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(120.dp)
+                    .size(90.dp)
                     .clip(RoundedCornerShape(12.dp)),
                 contentScale = ContentScale.Crop
             )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = product.name,
-                fontWeight = FontWeight.Bold,
-                fontSize = 12.sp,
-                maxLines = 2,
-                minLines = 2,
-                lineHeight = 14.sp
-            )
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "$${String.format(Locale.getDefault(), "%,.2f", product.price.toDouble())}",
-                    fontWeight = FontWeight.Black,
+                    text = product.name,
+                    fontWeight = FontWeight.Bold,
                     fontSize = 14.sp,
-                    modifier = Modifier.weight(1f)
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
                 )
-                Icon(Icons.Default.Star, contentDescription = null, tint = Color(0xFFFFC107), modifier = Modifier.size(12.dp))
-                Text("4.8", fontSize = 10.sp, fontWeight = FontWeight.Bold)
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            Button(
-                onClick = {},
-                modifier = Modifier.fillMaxWidth().height(30.dp),
-                shape = RoundedCornerShape(8.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7D5036)),
-                contentPadding = PaddingValues(0.dp)
-            ) {
-                Text("Añadir", fontSize = 11.sp)
+                if (product.type.isNotBlank()) {
+                    Text(
+                        text = product.type,
+                        fontSize = 11.sp,
+                        color = Color(0xFF7D5036),
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(top = 2.dp)
+                    )
+                }
+                if (product.description.isNotBlank()) {
+                    Text(
+                        text = product.description,
+                        fontSize = 12.sp,
+                        color = Color.Gray,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.height(6.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "$${String.format(Locale.getDefault(), "%,.0f", product.price.toDouble())}",
+                        fontWeight = FontWeight.Black,
+                        fontSize = 16.sp,
+                        color = Color(0xFF3D2314)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Surface(
+                        shape = RoundedCornerShape(6.dp),
+                        color = Color(0xFFEBD9C5),
+                        modifier = Modifier.padding(start = 4.dp)
+                    ) {
+                        Text(
+                            text = product.condition,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF7D5036),
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                        )
+                    }
+                }
             }
         }
     }

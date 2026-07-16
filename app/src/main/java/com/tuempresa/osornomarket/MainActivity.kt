@@ -15,6 +15,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.tuempresa.osornomarket.features.auth.ui.LoginScreen
+import com.tuempresa.osornomarket.features.auth.ui.RegisterScreen
 import com.tuempresa.osornomarket.features.home.ui.HomeScreen
 import com.tuempresa.osornomarket.features.product_detail.ui.AddEditProductScreen
 import com.tuempresa.osornomarket.ui.theme.OsornoMarketTheme
@@ -25,17 +27,32 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             OsornoMarketTheme {
-                // Navegación ultra simple:
-                var currentScreen by remember { mutableStateOf("home") }
+                // Navegación ultra simple con auth:
+                var currentScreen by remember { mutableStateOf("login") }
 
-                if (currentScreen == "home") {
-                    HomeScreen(
-                        onNavigateToAddProduct = { currentScreen = "add_product" }
-                    )
-                } else {
-                    AddEditProductScreen(
-                        onNavigateBack = { currentScreen = "home" }
-                    )
+                when (currentScreen) {
+                    "login" -> {
+                        LoginScreen(
+                            onNavigateToRegister = { currentScreen = "register" },
+                            onLoginSuccess = { currentScreen = "home" }
+                        )
+                    }
+                    "register" -> {
+                        RegisterScreen(
+                            onNavigateToLogin = { currentScreen = "login" },
+                            onRegisterSuccess = { currentScreen = "home" }
+                        )
+                    }
+                    "home" -> {
+                        HomeScreen(
+                            onNavigateToAddProduct = { currentScreen = "add_product" }
+                        )
+                    }
+                    "add_product" -> {
+                        AddEditProductScreen(
+                            onNavigateBack = { currentScreen = "home" }
+                        )
+                    }
                 }
             }
         }
